@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}貸出詳細{% endblock title %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="rental-page-title">貸出情報　編集画面</h1>
+
+      <form method="post">
+      {% csrf_token %}
+        <table class="edit-table" id="rental-edit-table">
+          <tobody>
+            <tr>
+              <th><label for="device_id" class="object-label">資産番号：</label></th>
+              <td>{{object.device.device_id}}</td>
+            </tr>
+
+            <tr>
+              <th><label for="user_id" class="object-label">社員番号：</label></th>
+              <td>{{object.user.user_id}}</td>
+            </tr>
+
+            <tr>
+              <th><label for="user_name" class="object-label">社員氏名：</label></th>
+              <td>{{object.user.name}}</td>
+            </tr>
+
+            <tr>
+              <th><label for="rental_start" class="object-label">貸出日：</label></th>
+              <td>{{object.rental_start|date:"Y/m/d H:i"}}</td>
+            </tr>
+            
+            <tr>
+              <th><label for="rental_end" class="object-label">返却日：</label></th>
+              {% if object.rental_end == None %}
+                <td style="color: green">貸出中</td>
+              {% else %}
+                <td>{{object.rental_end|date:"Y/m/d H:i"}}</td>
+              {% endif %}
+            </tr>
+
+            <tr>
+              <th class="hissu"><label for="rental_scheduled" class="form-label">返却予定日：</label></th>
+              <td>
+                {{form.rental_scheduled}}
+                {% for error in form.rental_scheduled.errors %}
+                  <p style="color: red">* {{ error }}</p>
+                {% endfor %}
+              </td>
+            </tr>
+
+            <tr>
+              <th class="hissu"><label for="place" class="form-label">設置場所：</label></th>
+              <td>{{form.place}}</td>
+            </tr>
+
+            <tr>
+              <th class="ninni"><label for="notes" class="form-label">備考：</label></th>
+              <td>{{form.notes}}</td>
+            </tr>
+
+          </tobody>
+        </table>
+
+        <div class="edit-btns enter-btns" id="rental-edit-btns">
+          <a class="btn back-btn btn-lg" href={% url 'rental:rental_detail' object.pk %} role="button">戻る</a>
+          {% if object.rental_end == None  %}
+            <button type="submit" class="btn decision-btn btn-lg">完了</button>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

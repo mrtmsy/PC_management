@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 社員新規登録 {% endblock title %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="users-page-title">社員新規登録画面</h1>
+
+      <form method="post">
+        {% csrf_token %}
+        
+        <table class="create-table" id="users-create-table">
+          <tbody>
+            {% for field in form %}
+            <tr>
+              {% if field.field.required == True %}
+                <th class="hissu">{{field.label_tag}}</th>
+              {% else %}
+                <th class="ninni">{{field.label_tag}}</th>
+              {% endif %}
+              <td>
+                {{field}}
+
+                {% for error in field.errors %}
+                  <p class="error-message">* {{ error }}</p>
+                {% endfor %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="create-btns enter-btns" id="users-create-btns">
+          <a class="btn back-btn btn-lg" href={% url 'users:users_management' %} role="button">戻る</a>
+          <button type="submit" class="btn decision-btn btn-lg">登録</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

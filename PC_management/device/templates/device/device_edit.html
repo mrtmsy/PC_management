@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 機器編集 {% endblock title %}
+
+{% block content %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    var commencementField = document.getElementById("id_commencement_date");
+    var expirationField = document.getElementById("id_expiration_date");
+
+    commencementField.addEventListener("change", function(){
+      var commencementValue = new Date(commencementField.value);
+      var minExpiration = new Date(commencementValue.getTime() + 24 * 60 * 60 * 1000)
+
+      var minExpirationDateString = minExpiration.toISOString().slice(0, 10);
+      expirationField.setAttribute("min", minExpirationDateString);
+    });
+  });
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="device-page-title">機器情報　編集画面</h1>
+
+      {% if object.is_deleted == 1 %}
+          <h4 class="m-4 attention" id="del-device-message">* この機器は削除済みです。</h4>
+      {% endif %}
+
+
+      <form method="post">
+        {% csrf_token %}
+
+        <table class="edit-table" id="device-edit-table">
+
+          <tbody>
+            <tr>
+            <th><label for="device_id" class="object-label">資産番号：</label></th>
+            <td>{{object.device_id}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="manufacture" class="object-label">メーカー：</label></th>
+            <td>{{object.manufacture}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="model_name" class="object-label">機器名：</label></th>
+            <td>{{object.model_name}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="device_type" class="object-label">機器タイプ：</label></th>
+            <td>{{object.device_type}}</td>
+          </tr>
+
+          {% if object.device_type == "PC" %}
+            <tr>
+              <th class="hissu"><label for="os" class="form-label hissu">OS：</label></th>
+              <td>
+                {{form.os}}
+                {% for error in form.os.errors %}
+                  <p class="error-message">* {{ error }}</p>
+                {% endfor %}
+              </td>
+            </tr>
+
+            <tr>
+              <th><label for="memory" class="object-label">メモリ：</label></th>
+              <td>
+                {% if object.memory == "その他" %}
+                  {{object.memory}}
+                {% else %}
+                  {{object.memory}} GB
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <th><label for="storage" class="object-label">ストレージ：</label></th>
+              <td>
+                {% if object.storage == 1 or object.storage == 2 %}
+                  {{object.storage}} TB
+                {% elif object.storage == "その他"%}
+                  {{object.storage}}
+                {% else %}
+                  {{object.storage}} GB
+                {% endif %}
+              </td>
+            </tr>
+
+            <tr>
+              <th><label for="gpu" class="object-label">GPU：</label></th>
+              <td>{{object.gpu}}</td>
+            </tr>
+          {% endif %}
+
+          <tr>
+            <th class="hissu"><label for="is_faulty" class="form-label">故障：</label></th>
+            <td>
+              {{form.is_faulty}}
+            </td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="inventry_date" class="form-label">棚卸し日：</label></th>
+            <td>{{form.inventry_date}}</td>
+          </tr>
+
+          <tr>
+            <th class="ninni"><label for="commencement_date" class="form-label">リース開始日：</label></th>
+            <td>{{form.commencement_date}}</td>
+          </tr>
+
+          <tr>
+            <th class="ninni"><label for="expiration_date" class="form-label">リース終了日：</label></th>
+            <td>
+              {{form.expiration_date}}
+              {% for error in form.expiration_date.errors %}
+                <p class="error-message">* {{ error }}</p>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <tr>
+            <th class="ninni"><label for="notes" class="form-label">備考：</label></th>
+            <td>{{form.notes}}</td>
+          </tr>
+
+          </tbody>
+        </table>
+        
+        <div class="edit-btns enter-btns" id="device-edit-btns">
+          <a class="btn back-btn btn-lg" href={% url 'device:device_detail' object.pk %} role="button">戻る</a>
+
+          {% if object.is_deleted == 0 %}
+            <button type="submit" class="btn decision-btn btn-lg">完了</button>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}

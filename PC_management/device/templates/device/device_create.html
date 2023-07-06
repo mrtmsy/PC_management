@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 機器新規登録 {% endblock title %}
+
+{% block content %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  var commencementDateField = document.getElementById("id_commencement_date");
+  var expirationDateField = document.getElementById("id_expiration_date");
+
+  function expirationDateChange(){
+      var expirationDateValue = new Date(expirationDateField.value);
+      var maxCommencementDate = new Date(expirationDateValue.getTime() - 24 * 60 * 60 * 1000);
+
+      var formattedMaxCommencementDate = maxCommencementDate.toISOString().slice(0,10);
+
+      commencementDateField.setAttribute("max", formattedMaxCommencementDate);
+    }
+
+    function commencementDateChange(){
+      var commencementDateValue = new Date(commencementDateField.value);
+      var minExpirationDate = new Date(commencementDateValue.getTime() + 24 * 60 * 60 * 1000);
+
+      var formattedMinReturnDate = minExpirationDate.toISOString().slice(0,10);
+
+      expirationDateField.setAttribute("min", formattedMinReturnDate);
+    }
+
+    commencementDateField.addEventListener("change", commencementDateChange);
+    expirationDateField.addEventListener("change", expirationDateChange);
+
+    if(commencementDateField.value){
+      commencementDateChange();
+    }
+
+    if(expirationDateField.value){
+      expirationDateChange();
+    }
+
+  function selectType(deviceType){
+    if(deviceType === "PC"){
+      document.getElementById("id_os").closest("tr").style.display = "";
+      document.getElementById("id_memory").closest("tr").style.display = "";
+      document.getElementById("id_storage").closest("tr").style.display = "";
+      document.getElementById("id_gpu").closest("tr").style.display = "";
+    }else{
+      document.getElementById("id_os").closest("tr").style.display = "none";
+      document.getElementById("id_memory").closest("tr").style.display = "none";
+      document.getElementById("id_storage").closest("tr").style.display = "none";
+      document.getElementById("id_gpu").closest("tr").style.display = "none";
+    }
+  }
+  //初期表示
+  selectType(document.getElementById('id_device_type').value);
+  //切り替え
+  document.getElementById("id_device_type").addEventListener("change", function() { selectType(this.value);});
+});
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="device-page-title">機器新規登録画面</h1>
+      <form method="post">
+        {% csrf_token %}
+        <table class="create-table" id="device-create-table">
+          <tbody>
+            {% for field in form %}
+            <tr>
+              {% if field.field.required == True or field == form.os or field == form.memory or field == form.storage or field == form.gpu %}
+              <th class="hissu">{{field.label_tag}}</th>
+              {% else %}
+                <th class="ninni">{{field.label_tag}}</th>
+              {% endif %}
+
+              <td>
+                {% if field == form.device_type %}
+                  {{field}}
+                {% else %}
+                  {{field}}
+                {% endif %}
+                {% for error in field.errors %}
+                  <p class="error-message">* {{ error }}</p>
+                {% endfor %}
+              </td>
+            </tr>
+
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="create-btns enter-btns" id="device-create-btns">
+          <a class="btn back-btn btn-lg " href={% url 'device:device_management' %} role="button">戻る</a>
+          <button type="submit" class="btn decision-btn btn-lg ">登録</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}

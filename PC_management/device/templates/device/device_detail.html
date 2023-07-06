@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}機器詳細{% endblock title %}
+
+{% block content %}
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  var commencementField = document.getElementById("id_commencement_date");
+  var expirationField = document.getElementById("id_expiration_date");
+
+  commencementField.addEventListener("change", function(){
+    var commencementValue = new Date(commencementField.value);
+    var minExpiration = new Date(commencementValue.getTime() + 24 * 60 * 60 * 1000);
+    var minExpirationDateString = minExpiration.toISOString().slice(0, 10);
+    expirationField.setAttribute("min", minExpirationDateString);
+  });
+});
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      
+      <h1 class="page-title" id="device-page-title">機器情報　詳細画面</h1>
+
+      {% if object.is_deleted == 1 %}
+        <h4 class="m-4 attention" id="del-device-message">* この機器は削除済みです。</h4>
+      {% endif %}
+
+      <table class="detail-table" id="device-detail-table">
+
+        <tobody>
+          <tr>
+            <th align="right"><label for="device_id" class="object-label">資産番号：</label></th>
+            <td>{{object.device_id}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="manufacture" class="object-label">メーカー：</label></th>
+            <td>{{object.manufacture}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="model_name" class="object-label">機器名：</label></th>
+            <td>{{object.model_name}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="device_type" class="object-label">機器タイプ：</label></th>
+            <td>{{object.device_type}}</td>
+          </tr>
+          
+          {% if object.device_type == "PC" %}
+            <tr>
+              <th><label for="os" class="object-label">OS：</label></th>
+              <td>{{object.os}}</td>
+            </tr>
+            <tr>
+              <th><label for="memory" class="object-label">メモリ：</label></th>
+              <td>
+                {% if object.memory == "その他" %}
+                  {{object.memory}}
+                {% else %}
+                  {{object.memory}} GB
+                </td>
+              </tr>
+              {% endif %}
+
+            <tr>
+              <th><label for="storage" class="object-label">ストレージ：</label></th>
+              <td>
+                {% if object.storage == 1 or object.storage == 2 %}
+                  {{object.storage}} TB
+                {% elif object.storage == "その他"%}
+                  {{object.storage}}
+                {% else %}
+                  {{object.storage}} GB
+                {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+              <th><label for="gpu" class="object-label">GPU：</label></th>
+              <td>{{object.gpu}}</td>
+            </tr>
+          {% endif %}
+
+          <tr>
+            <th><label for="is_faulty" class="object-label">故障：</label></th>
+            <td>
+              {% if object.is_faulty == True %}
+                <span class="attention"><strong>故障中</strong></span>
+              {% else %}
+                <span>-</span>
+              {% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <th><label for="inventry_date" class="object-label">棚卸し日：</label></th>
+              {% if object.inventry_date <= inventry_deadline%}
+                <td><strong class="attention">{{object.inventry_date|date:"Y/m/d"}}</strong></td>
+              {% else %}
+                <td>{{object.inventry_date|date:"Y/m/d"}}</td>
+              {% endif %}
+          </tr>
+
+          <tr>
+            <th><label for="commencement_date" class="object-label">リース開始日：</label></th>
+            <td>
+              {% if object.commencement_date == None %}
+                <span>-</span>
+              {% else %}
+                {{object.commencement_date|date:"Y/m/d"}}
+              {% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <th><label for="expiration_date" class="object-label">リース終了日：</label></th>
+              {% if object.expiration_date == None %}
+                <td><span>-</span></td>
+              {% elif object.expiration_date <= expiration_deadline %}
+                <td><strong class="attention">{{object.expiration_date|date:"Y/m/d"}}</strong></td>
+              {% else %}
+                <td>{{object.expiration_date|date:"Y/m/d"}}</td>
+              {% endif %}
+          </tr>
+
+          <tr>
+            <th><label for="registration_date" class="object-label">登録日：</label></th>
+            <td>{{object.registration_date|date:"Y/m/d H:i"}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="update_date" class="object-label">更新日：</label></th>
+            <td>{{object.update_date|date:"Y/m/d H:i"}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="notes" class="object-label">備考：</label></th>
+            <td>{{object.notes | linebreaksbr}}</td>
+          </tr>
+          
+        </tobody>
+      </table>
+
+      <div class="detail-btns enter-btns" id="device-detail-btns">
+        {% if request.META.HTTP_REFERER == None or "edit" in request.META.HTTP_REFERER %}
+          <a class="btn back-btn btn-lg " href={% url 'device:device_management' %} role="button">戻る</a>
+        {% else %}
+          <a class="btn back-btn btn-lg " href={{request.META.HTTP_REFERER}} role="button">戻る</a>
+        {% endif %}
+        {% if object.is_deleted == 0 %}
+          <a class="btn decision-btn btn-lg" href={% url 'device:device_edit' object.pk %} role="button">編集</a>
+          <a class="btn danger-btn btn-lg", data-toggle="modal", data-target="#deleteModal">削除</a>
+        {% endif %}
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4><div class="modal-title" id="myModalLabel">削除確認</div></h4>
+      </div>
+      <div class="modal-body">
+        <label>データを削除しますか？</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+        <a href="{% url 'device:device_delete' pk=object.pk %}" ><button type="button" class="btn danger-btn">削除</button></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

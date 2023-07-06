@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 貸出管理 {% endblock title %}
+
+{% block content %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    var rentalStartField = document.getElementById("id_rental_start");
+    var rentalScheduledField = document.getElementById("id_rental_scheduled");
+
+    rentalStartField.addEventListener("change", function(){
+      var rentalStartValue = new Date(rentalStartField.value);
+      var minrentalScheduled = new Date(rentalStartValue.getTime() + 24 * 60 * 60 * 1000)
+
+      var minrentalScheduledDateString = minrentalScheduled.toISOString().slice(0, 10);
+      rentalScheduledField.setAttribute("min", minrentalScheduledDateString);
+    });
+  });
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="rental-page-title">貸出管理画面</h1>
+
+      <div class="create" >
+        <a class="btn btn-lg create-btn " href={% url 'rental:rental_create' %} role="button" id="rental-creat-btn">新規登録</a>
+      </div>
+
+      <!--返却予定日超過アラート-->
+      {% if over_scheduled_cnt > 0 %}
+      <div class="alert-message">
+        <a class="btn btn-alert ", data-toggle="modal", data-target="#rentalScheduledModal">返却予定日超過{{over_scheduled_cnt}}件</a>
+      </div>
+      
+      <div class="modal fade" id="rentalScheduledModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content ">
+            
+            <div class="modal-header">
+              <h5 class="modal-title">返却予定日超過</h5>
+            </div>
+            
+            <div class="modal-body">
+              <h6>返却期限が過ぎている機器があります。</h6>
+
+              <table class="alert-table" id="over-scheduled-table">
+                <thead>
+                  <th></th>
+                  <th>資産番号</th>
+                  <th>社員番号</th>
+                  <th>貸出日</th>
+                  <th>返却予定日</th>
+                </thead>
+                
+                <tbody>
+                  {%for id, user, device, rental_start, rental_scheduled, place in over_scheduled%}
+                  <tr>
+                    <td><a class="btn btn-sm detail-btn" href={% url 'rental:rental_detail' id %} role="button">詳細</a></td>
+                    <td><a href="{% url 'device:device_detail' device %}">{{device}}</a></td>
+                    <td><a href="{% url 'users:users_detail' user %}">{{user}}</a></td>
+                    <td>{{rental_start |date:"Y/m/d H:i"}}</td>
+                    <td><strong class="attention">{{rental_scheduled |date:"Y/m/d H:i"}}</strong></td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+              </table>
+            </div>
+            
+            <div class="modal-footer">
+              <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      
+      <h6 class="summary" id="rental-summary">貸出　PC：{{pc_using_cnt}} / {{pc_cnt}}台　マウス：{{mouse_using_cnt}} / {{mouse_cnt}}台　その他：{{other_using_cnt}} / {{other_cnt}}台</h6>
+
+      <table class="table table-striped list-table" id="rental-list-table">
+
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">資産番号</th>
+            <th scope="col">社員番号</th>
+            <th scope="col">社員氏名</th>
+            <th scope="col">貸出日</th>
+            <th scope="col">返却予定日</th>
+            <th scope="col">備考</th>
+            <th scope="col">貸出状況</th>
+            <th scope="col">更新日</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for rental in rental_list %}
+          <tr>
+            <td><a class="btn detail-btn" href={% url 'rental:rental_detail' rental.pk%} role="button">詳細</a></td>
+            <td><a href="{% url 'device:device_detail' rental.device.device_id %}"> {{rental.device.device_id}}</a></td>
+            <td><a href="{% url 'users:users_detail' rental.user.user_id %}"> {{rental.user.user_id}}</a></td>
+            <td>{{rental.user.name}}</td>
+            <td>{{rental.rental_start|date:"Y/m/d"}}</td>
+
+            {% if rental.rental_scheduled < today and rental.rental_end == None %}
+            <td><strong class="attention">{{rental.rental_scheduled|date:"Y/m/d"}}</strong></td>
+            {% else %}
+            <td>{{rental.rental_scheduled|date:"Y/m/d"}}</td>
+            {% endif %}
+            
+            <td>{{rental.notes}}</td>
+
+            {% if rental.rental_end == None %}
+              <td><span class="green">貸出中</span></td>
+            {% else %}
+              <td><span class="gray">返却済</span></td>
+            {% endif %}
+            
+            <td>{{rental.update_date|date:"Y/m/d H:i"}}</td>
+
+          </tr>
+          {% endfor %}
+
+        </tbody> 
+      </table>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

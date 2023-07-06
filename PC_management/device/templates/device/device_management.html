@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 機器管理 {% endblock title %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="device-page-title">機器管理画面</h1>
+
+      <div class="create">
+        <a class="btn btn-lg create-btn" href={% url 'device:device_create' %} role="button" id="device-create-btn">新規登録</a>
+      </div>
+      
+      <div class="alert-message">
+      <!--棚卸しアラート-->
+      {% if over_inventry_cnt > 0 %}
+        <a class="btn btn-alert", data-toggle="modal", data-target="#inventry_date_Modal" id="over-inventry-btn">棚卸し期限超過{{over_inventry_cnt}}件</a>
+      
+        <div class="modal fade" id="inventry_date_Modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content ">
+              
+              <div class="modal-header">
+                <h5 class="modal-title">棚卸し期限超過</h5>
+              </div>
+              
+              <div class="modal-body">
+                <h5>棚卸し期限が過ぎている機器があります。</h5>
+                <p>棚卸しは半年に1回行ってください。</p>
+                <ul>
+                  <h6>＜棚卸し時の確認事項＞</h6>
+                  <li>PCの所在確認（故障や電源アダプターのチェック）</li>
+                  <li>PCのOSアップデートが最新化されていること</li>
+                  <li>ウイルスソフトの定義が最新であること</li>
+                </ul>
+
+                <table class="alert-table" id="over-inventry-table">
+                  <thead>
+                    <th>資産番号</th>
+                    <th>機器名</th>
+                    <th>棚卸し日</th>
+                  </thead>
+                  
+                  <tbody>
+                    {%for inventry_date, id, model_name in over_inventry%}
+                    <tr>
+                        <td><a href="{% url 'device:device_detail' id %}">{{id}}</a></td>
+                        <td>{{model_name}}</td>
+                        <td><strong class="attention">{{inventry_date |date:"Y/m/d"}}</strong></td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!--リース期限アラート-->
+        {% if over_expiration_cnt > 0 %}
+        <a class="btn  btn-alert", data-toggle="modal", data-target="#expiration_date_Modal" id="over-expiration-btn">リース期限間近{{over_expiration_cnt}}件</a>
+
+        <div class="modal fade" id="expiration_date_Modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content ">
+              
+              <div class="modal-header">
+                <h5 class="modal-title">リース期限が近い機器リスト</h5>
+              </div>
+              
+              <div class="modal-body">
+                <h6>リース期限が近い機器があります。</h6>
+
+                <table class="alert-table" id="over-expiration-table">
+                  <thead>
+                    <th>資産番号</th>
+                    <th>機器名</th>
+                    <th>リース終了日</th>
+                  </thead>
+
+                  <tbody>
+                    {%for expiration_date, id, model_name in over_expiration%}
+                    <tr>
+                        <td><a href="{% url 'device:device_detail' id %}">{{id}}</a></td>
+                        <td>{{model_name}}</td>
+                        <td><strong class="attention">{{expiration_date |date:"Y/m/d"}}</strong></td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
+      </div>
+      <h6 class="summary" id="device-summary">PC：{{pc_cnt}}台　マウス：{{mouse_cnt}}台　その他：{{other_cnt}}台　合計：{{all_cnt}}台</h6>
+
+      <!--テーブル表示-->
+      <table class="table table-striped list-table" id="device-list-table" >
+
+        <thead>
+            <th scope="col">資産番号</th>
+            <th scope="col">機器タイプ</th>
+            <th scope="col">故障</th>
+            <th scope="col">棚卸日</th>
+            <th scope="col">備考</th>
+            <th scope="col">更新日</th>
+        </thead>
+
+        <tbody>
+          {% for device in device_list %}
+          <tr>
+            <td><a href="{% url 'device:device_detail' device.pk %}"> {{device.device_id}}</a></td>
+            <td>{{device.device_type}}</td>
+            
+              {% if device.is_faulty == True %}
+                <td><strong class="attention">故障中</strong></td>
+                {% else %}
+                  <td><span>-</span></td>
+              {% endif %}
+
+            {% if device.inventry_date <= inventry_deadline%}
+              <td><strong  class="attention">{{device.inventry_date|date:"Y/m/d"}}</strong></td>
+            {% else %}
+              <td>{{device.inventry_date|date:"Y/m/d"}}</td>
+            {% endif %}
+
+            <td>{{device.notes}}</td>
+            <td>{{device.update_date|date:"Y/m/d H:i"}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div> 
+</div>
+{% endblock content %}
+
+

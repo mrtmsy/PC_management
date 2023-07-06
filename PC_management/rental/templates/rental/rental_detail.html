@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}貸出詳細{% endblock title %}
+
+{% block content %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    var rentalStartField = document.getElementById("id_rental_start");
+    var rentalScheduledField = document.getElementById("id_rental_scheduled");
+
+    rentalStartField.addEventListener("change", function(){
+      var rentalStartValue = new Date(rentalStartField.value);
+      var minRentalScheduled = new Date(rentalStartValue.getTime() + 60 * 1000);
+      var timeZoneOffset = rentalStartValue.getTimezoneOffset() * 60 * 1000;
+      minRentalScheduled = new Date(minRentalScheduled.getTime() - timeZoneOffset);
+
+      var minRentalScheduledDateString = minRentalScheduled.toISOString().slice(0, 16);
+      rentalScheduledField.setAttribute("min", minRentalScheduledDateString);
+    });
+  });
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <div class="mt-3">
+        {% if form.rental_end.errors %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          {% for error in form.rental_end.errors %}
+          {{ error }}
+          {% endfor %}
+          <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+      </div>
+      
+      <h1 class="page-title" id="rental-page-title">貸出情報　詳細画面</h1>
+      
+      <table class="detail-table" id="rental-detail-table">
+        <tobody>
+          
+          <tr>
+            <th><label for="device_id" class="object-label">資産番号：</label></th>
+            <td><a href="{% url 'device:device_detail' object.device.device_id %}"> {{object.device.device_id}}</a></td>
+          </tr>
+          
+          <tr>
+            <th><label for="user_id" class="object-label">社員番号：</label></th>
+            <td><a href="{% url 'users:users_detail' object.user.user_id %}"> {{object.user.user_id}}</a></td>
+          </tr>
+
+          <tr>
+            <th><label for="user_name" class="object-label">社員氏名：</label></th>
+            <td>{{object.user.name}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="rental_start" class="object-label">貸出日：</label></th>
+            <td>{{object.rental_start|date:"Y/m/d H:i"}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="rental_end" class="object-label">返却日：</label></th>
+            {% if object.rental_end == None %}
+              <td><span class="green">貸出中</span></td>
+            {% else %}
+              <td>{{object.rental_end|date:"Y/m/d H:i"}}</td>
+            {% endif %}
+          </tr>
+
+          <tr>
+            <th><label for="rental_scheduled" class="object-label">返却予定日：</label></th>
+            {% if object.rental_scheduled < today and object.rental_end == None%}
+              <td><strong class="attention">{{object.rental_scheduled|date:"Y/m/d H:i"}}</strong></td>
+            {% else %}
+              <td>{{object.rental_scheduled|date:"Y/m/d H:i"}}</td>
+            {% endif %}
+          </tr>
+
+          <tr>
+            <th><label for="place" class="object-label">設置場所：</label></th>
+            <td>{{object.place}}</td>
+          </tr>
+          
+          <tr>
+            <th><label for="registration_date" class="object-label">登録日：</label></th>
+            <td>{{object.registration_date|date:"Y/m/d H:i"}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="update_date" class="object-label">更新日：</label></th>
+            <td>{{object.update_date|date:"Y/m/d H:i"}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="notes" class="object-label">備考：</label></th>
+            <td>{{object.notes | linebreaksbr}}</td>
+          </tr>
+
+        </tobody>
+      </table>
+
+      <div class="detail-btns enter-btns" id="rental-detail-btns">
+        <a class="btn back-btn btn-lg" href={% url 'rental:rental_management' %} role="button">戻る</a>
+
+        {% if object.rental_end == None %}
+          <a class="btn decision-btn btn-lg" href={% url 'rental:rental_edit' object.pk %} role="button">編集</a>
+          <a class="btn danger-btn btn-lg", data-toggle="modal", data-target="#returnModal">返却</a>
+        {% else %}
+          <a class="btn danger-btn btn-lg" data-toggle="modal" data-target="#deletemodal">削除</a>
+        {% endif %}
+      </div>
+
+      <div class="modal fade" id="deletemodal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <form method="post" action="{% url 'rental:rental_delete' object.pk %}">
+            {% csrf_token %}
+            
+            <div class="modal-header">
+              <h4><div class="modal-title" id="myModalLabel">データ削除</div></h4>
+            </div>
+            
+            <div class="modal-body">
+              <label><h5>以下の貸出履歴を貸出管理画面から消去します。</h5></label>
+              <ul>
+                <li>資産番号：{{object.device.device_id}}</li>
+                <li>社員番号：{{object.user.user_id}}</li>
+                <li>社員名：{{object.user.name}}</li>
+              </ul>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              <button type="submit" class="btn danger-btn">確定</button>
+            </div>
+
+            </form>
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="post">
+            {% csrf_token %}
+
+            <div class="modal-header">
+              <h4><div class="modal-title" id="myModalLabel">返却確認</div></h4>
+            </div>
+
+            <div class="modal-body">
+                <label><h5>以下の機器を返却します。</h5></label>
+                <ul>
+                  <li>資産番号：{{object.device.device_id}}</li>
+                  <li>氏名：{{object.user.name}}</li>
+                  <li>貸出日：{{object.rental_start}}</li>
+                  <li>返却日を入力してください</li>
+                  {{form.rental_end}}
+                  
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              <button type="submit" class="btn danger-btn">返却</button>
+            </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

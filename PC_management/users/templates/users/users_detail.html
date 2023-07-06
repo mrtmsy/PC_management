@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}社員詳細{% endblock title %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="users-page-title">社員情報　詳細画面</h1>
+
+      {% if not object.retirement_date == None%}
+        <h4 class="m-4 attention" id="del-users-message">* この社員は退職済みです。</h4>
+      {% endif %}
+
+      <table class="detail-table" id="users-detail-table">
+        <tobody>
+        <tr>
+          <th><label for="user_id" class="object-label">社員番号：</label></th>
+          <td>{{object.user_id}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="name" class="object-label">氏名：</label></th>
+          <td>{{object.name}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="kana_name" class="object-label">シメイ：</label></th>
+          <td>{{object.kana_name}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="age" class="object-label">生年月日 (年齢)：</label></th>
+          <td>{{object.birthday|date:"Y/m/d"}} ({{age}}歳)</td>
+        </tr>
+
+        <tr>
+          <th><label for="gender" class="object-label">性別：</label></th>
+          <td>
+            {% if object.gender == None %}
+              <span>-</span>
+            {% else %}
+              {{object.gender}}
+            {% endif %}
+          </td>
+        </tr>
+
+        <tr>
+          <th><label for="phone_number" class="object-label">電話番号：</label></th>
+          <td>{{object.phone_number}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="mail" class="object-label">メールアドレス：</label></th>
+          <td>{{object.mail}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="position" class="object-label">役職：</label></th>
+          <td>{{object.position}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="department" class="object-label">部署：</label></th>
+          <td>{{object.department}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="authority" class="object-label">権限：</label></th>
+          <td>{{object.authority}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="registration_date" class="object-label">登録日：</label></th>
+          <td>{{object.registration_date|date:"Y/m/d H:i"}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="update_date" class="object-label">更新日：</label></th>
+          <td>{{object.update_date|date:"Y/m/d H:i"}}</td>
+        </tr>
+        
+        <tr>
+          <th><label for="retirement_date" class="object-label">退職日：</label></th>
+          <td>{{object.retirement_date|date:"Y/m/d"}}</td>
+        </tr>
+
+        <tr>
+          <th><label for="notes" class="object-label">備考：</label></th>
+          <td>{{object.notes | linebreaksbr}}</td>
+        </tr>
+
+        </tobody>
+      </table>
+
+      <div class="users-btns enter-btns" id="users-detail-btns">
+        {% if request.META.HTTP_REFERER == None or "edit" in request.META.HTTP_REFERER or "users" in request.META.HTTP_REFERER  %}
+          <a class="btn back-btn btn-lg" href={% url 'users:users_management' %} role="button">戻る</a>
+        {% else %}
+          <a class="btn back-btn btn-lg " href={{request.META.HTTP_REFERER}} role="button">戻る</a>
+        {% endif %}
+
+        {% if object.retirement_date == None %}
+          <a class="btn decision-btn btn-lg" href={% url 'users:users_edit' object.pk %} role="button">編集</a>
+          <a class="btn danger-btn btn-lg", data-toggle="modal", data-target="#retirementModal">退職</a> 
+        {% else %}
+          <a class="btn danger-btn btn-lg" data-toggle="modal" data-target="#deletemodal">削除</a>
+        {% endif %}
+      </div>
+
+      <div class="modal fade" id="deletemodal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <form method="post" action="{% url 'users:users_delete' object.pk %}">
+            {% csrf_token %}
+            
+            <div class="modal-header">
+              <h4><div class="modal-title" id="myModalLabel">データ削除</div></h4>
+            </div>
+            
+            <div class="modal-body">
+              <label><h5>以下の社員を社員管理画面から消去します。</h5></label>
+              <ul>
+                <li>社員番号：{{object.user_id}}</li>
+                <li>氏名：{{object.name}}</li>
+              </ul>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              <button type="submit" class="btn danger-btn">確定</button>
+            </div>
+
+            </form>
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="retirementModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <form method="post" action="{% url 'users:users_retirement' object.pk %}">
+            {% csrf_token %}
+            
+            <div class="modal-header">
+              <h4><div class="modal-title" id="myModalLabel">退職確認</div></h4>
+            </div>
+            
+            <div class="modal-body">
+              <label><h5>以下の社員が退職済みになります。</h5></label>
+              <ul>
+                <li>社員番号：{{object.user_id}}</li>
+                <li>氏名：{{object.name}}</li>
+                <li>退職日を入力してください</li>
+                <input type="date" class="form-control" id="retirement_date" name="retirement_date" required>
+              </ul>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+              <button type="submit" class="btn danger-btn">確定</button>
+            </div>
+
+            </form>
+            
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

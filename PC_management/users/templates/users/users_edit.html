@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}社員編集{% endblock title %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="users-page-title">社員情報　編集画面</h1>
+
+      <form method="post">
+      {% csrf_token %}
+
+        <table class="edit-table" id="users-edit-table">
+          <tobody>
+          <tr>
+            <th><label for="user_id" class="object-label">社員番号：</label></th>
+            <td>{{object.user_id}}</td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="name" class="form-label">氏名：</label></th>
+            <td>{{form.name}}</td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="kana_name" class="form-label">シメイ：</label></th>
+            <td>{{form.kana_name}}</td>
+          </tr>
+
+          <tr>
+            <th><label for="age" class="object-label">生年月日 (年齢)：</label></th>
+            <td>{{object.birthday}} ({{age}}歳)</td>
+          </tr>
+
+          <tr>
+            <th ><label for="gender" class="object-label">性別：</label></th>
+            <td>
+              {% if object.gender == None %}
+                <span>-</span>
+              {% else %}
+                {{object.gender}}
+              {% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="phone_number" class="form-label">電話番号：</label></th>
+            <td>
+              {{form.phone_number}}
+              {% for error in form.phone_number.errors %}
+                  <p class="error-message">* {{ error }}</p>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="mail" class="form-label">メールアドレス：</label></th>
+            <td>
+              {{form.mail}}
+              {% for error in form.mail.errors %}
+                  <p class="error-message">* {{ error }}</p>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="position" class="form-label">役職：</label></th>
+            <td>{{form.position}}</td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="department" class="form-label">部署：</label></th>
+            <td>{{form.department}}</td>
+          </tr>
+
+          <tr>
+            <th class="hissu"><label for="authority" class="form-label">権限：</label></th>
+            <td>{{form.authority}}</td>
+          </tr>
+
+          <tr>
+            <th class="ninni"><label for="notes" class="object-label">備考：</label></th>
+            <td>{{form.notes}}</td>
+          </tr>
+
+          </tobody>
+        </table>
+        
+        <div class="edit-btns enter-btns" id="users-edit-btns">
+        <a class="btn back-btn btn-lg" href={% url 'users:users_detail' object.pk %} role="button">戻る</a>
+        <button type="submit" class="btn decision-btn btn-lg">完了</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

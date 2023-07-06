@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 貸出新規登録 {% endblock title %}
+
+{% block content %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    var rentalStartField = document.getElementById("id_rental_start");
+    var rentalScheduledField = document.getElementById("id_rental_scheduled");
+
+    function rentalScheduledChange(){
+      var rentalScheduledValue = new Date(rentalScheduledField.value);
+      var maxStartDate = new Date(rentalScheduledValue.getTime());
+
+      var timeZoneOffset = rentalScheduledValue.getTimezoneOffset() * 60 * 1000;
+      maxStartDate = new Date(maxStartDate.getTime() - timeZoneOffset);
+
+      var formattedMaxStartDate = maxStartDate.toISOString().slice(0,16);
+
+      rentalStartField.setAttribute("max", formattedMaxStartDate);
+    }
+
+    function rentalStartChange(){
+      var rentalStartValue = new Date(rentalStartField.value);
+      var minRentalScheduled = new Date(rentalStartValue.getTime() + 60 * 1000);
+
+      var timeZoneOffset = rentalStartValue.getTimezoneOffset() * 60 * 1000;
+      minRentalScheduled = new Date(minRentalScheduled.getTime() - timeZoneOffset);
+
+      var formattedMinReturnDate = minRentalScheduled.toISOString().slice(0,16);
+
+      rentalScheduledField.setAttribute("min", formattedMinReturnDate);
+    }
+
+    rentalStartField.addEventListener("change", rentalStartChange);
+    rentalScheduledField.addEventListener("change", rentalScheduledChange);
+
+    if(rentalStartField.value){
+      rentalStartChange();
+    }
+
+    if(rentalScheduledField.value){
+      rentalScheduledChange();
+    }
+  });
+</script>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="rental-page-title">貸出新規登録画面</h1>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <table class="create-table" id="rental-create-table">
+          <tbody>
+            {% for field in form %}
+            <tr>
+              {% if field.field.required == True %}
+                <th class="hissu">{{field.label_tag}}</th>
+              {% else %}
+                <th class="ninni">{{field.label_tag}}</th>
+              {% endif %}
+
+                {% if field == form.device %}
+                <td>
+                  {{field}}
+                  <button type="button" class="btn select-btn btn-sm" data-toggle="modal" data-target="#SearchDeviceModal">選択</button>
+                  {% for error in field.errors %}
+                    <p class="error-message">* {{ error }}</p>
+                  {% endfor %}
+
+                  <!--資産番号モーダル-->
+                  <div class="modal fade" id="SearchDeviceModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                      <div class="modal-content">
+
+                        <div class="modal-header">
+                          <h4><div class="modal-title" id="myModalLabel">機器選択</div></h4>
+                        </div>
+                        <div class="modal-body">
+                          <label>借りる機器を選択してください。</label>
+
+                          <table class="table table-hover search-table" id="device-search-table">
+                            <thead>
+                              <tr>
+                                <th scope="col"></th>
+                                <th scope="col">資産番号</th>
+                                <th scope="col">機器タイプ</th>
+                                <th scope="col">メーカー</th>
+                                <th scope="col">OS</th>
+                                <th scope="col">メモリ</th>
+                                <th scope="col">GPU</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              <div id="device_form">
+                                {% for device in device_list %}
+                                <tr>
+                                  <td ><input type="radio" name="device_id" value="{{device.device_id}}" id="{{device.device_id}}" onclick="clickBtn1()"></td>
+                                  <td><label for="{{device.device_id}}">{{device.device_id}}</label></td>
+                                  <td><label for="{{device.device_id}}">{{device.device_type}}</label></td>
+                                  <td><label for="{{device.device_id}}">{{device.manufacture}}</label></td>
+                                  
+                                  {% if device.os == "" or device.os == None %}
+                                    <td><label for="{{device.device_id}}">-</label></td>
+                                  {% else %}
+                                    <td><label for="{{device.device_id}}">{{device.os}}</label></td>
+                                  {% endif %}
+
+                                  {% if device.memory == "その他" %}
+                                    <td><label for="{{device.device_id}}">{{device.memory}}</td>
+                                  {% elif device.memory == "" or device.memory == None %}
+                                    <td><label for="{{device.device_id}}"><span>-</span></label></td>
+                                  {% else %}
+                                    <td><label for="{{device.device_id}}">{{device.memory}} GB</label></td>
+                                  {% endif %}
+                                  
+                                  {% if device.gpu == "" or device.gpu == None %}
+                                    <td><label for="{{device.device_id}}">-</label></td>
+                                  {% else %}
+                                    <td><label for="{{device.device_id}}">{{device.gpu}}</label></td>
+                                  {% endif %}
+                                  
+                                </tr>
+
+                                {% endfor %}
+                              </div>
+                            </tbody>
+                          </table>
+                          
+                          <p>選択した資産番号： <input type="text"  id="chose_device" readonly></p>
+
+                          <script>
+                            function clickBtn1() {
+                              var str;
+                              var device_id = document.getElementsByName("device_id");
+                              
+                              for (var i = 0; i < device_id.length; i++) {
+                                if (device_id[i].checked) {
+                                  str = device_id[i].value;
+                                  break;
+                                }
+                              }
+                              document.getElementById("chose_device").value = str;
+                              document.getElementById("id_device").value = str;
+                            }
+                          </script>
+                        </div>
+
+                        <div class="modal-footer">
+                          <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+                          <button type="button" class="btn decision-btn" data-dismiss="modal">選択</button>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                  {% elif field == form.user %}
+                  <td>
+                    {{ field }}
+                    <button type="button" class="btn select-btn btn-sm" data-toggle="modal" data-target="#SearchUsersModal">選択</button>
+                    {% for error in field.errors %}
+                      <p class="error-message">* {{ error }}</p>
+                    {% endfor %}
+                  
+                    <!--社員氏名モーダル-->
+                    <div class="modal fade" id="SearchUsersModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                      <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+
+                          <div class="modal-header">
+                            <h4><div class="modal-title" id="myModalLabel">社員選択</div></h4>
+                          </div>
+
+                          <div class="modal-body">
+                            <label>借りる社員を選択してください。</label>
+
+                            <table class="table table-hover search-table" id="user-search-table">
+                              <thead>
+                                <tr>
+                                  <th scope="col"></th>
+                                  <th scope="col">社員番号</th>
+                                  <th scope="col">社員氏名</th>
+                                  <th scope="col">役職</th>
+                                  <th scope="col">部署</th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                <div id="user_form">
+                                {% for user in user_list %}
+                                <tr>
+                                  <td ><input type="radio" name="user_id" value="{{user.user_id}}" id="{{user.user_id}}" onclick="clickBtn2()"></td>
+                                  <td><label for="{{user.user_id}}">{{user.user_id}}</label></td>
+                                  <td><label for="{{user.user_id}}">{{user.name}}</label></td>
+                                  <td><label for="{{user.user_id}}">{{user.position}}</label></td>
+                                  <td><label for="{{user.user_id}}">{{user.department}}</label></td>
+                                </tr>
+                                {% endfor %}
+                              </div>
+                              </tbody>
+                            </table>
+                            
+                            <p>選択した社員番号： <input type="text"  id="chose_user" readonly></p>
+
+                            <script>
+                            function clickBtn2() {
+                              var str;
+                              var user_id = document.getElementsByName("user_id");
+
+                              for (var i = 0; i < user_id.length; i++) {
+                                if (user_id[i].checked) {
+                                  str = user_id[i].value;
+                                  break;
+                                }
+                              }
+                              document.getElementById("chose_user").value = str;
+                              document.getElementById("id_user").value = str;
+                            }
+                            </script>
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="button" class="btn back-btn" data-dismiss="modal">閉じる</button>
+                            <button type="button" class="btn decision-btn" data-dismiss="modal">選択</button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {% else %} 
+                    <td>
+                      {{field}}
+                      {% for error in field.errors %}
+                        <p class="error-message">* {{ error }}</p>
+                      {% endfor %}
+                    </td>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="create-btns enter-btns" id="rental-create-btns">
+          <h4 class="attention">※貸出前に棚卸しをしてください</h4>
+          <a class="btn back-btn btn-lg" href={% url 'rental:rental_management' %} role="button">戻る</a>
+          <button type="submit" class="btn decision-btn btn-lg">登録</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock content %}

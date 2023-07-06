@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 社員管理 {% endblock title %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1 class="page-title" id="users-page-title">社員管理画面</h1>
+
+        <div class="create" >
+          <a class="btn btn-lg create-btn" href={% url 'users:users_create' %} role="button" id="users-creat-btn">新規登録</a>
+        </div>
+        <h6 class="summary" id="users-summary">在籍者数：{{enrolled_cnt}}名　退職者数：{{retirement_cnt}}名　合計人数：{{all_cnt}}名</h6>
+      </div>
+      
+      <table class="table table-striped list-table" id="users-list-table">
+
+        <thead>
+          <tr align="center">
+            <th scope="col">社員番号</th>
+            <th scope="col">氏名</th>
+            <th scope="col">シメイ</th>
+            <th scope="col">所属部署</th>
+            <th scope="col">電話番号</th>
+            <th scope="col">メールアドレス</th>
+            <th scope="col">備考</th>
+            <th scope="col">更新日</th>
+            <th scope="col">退職</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for user in users_list %}
+          <tr>
+            <td><a href="{% url 'users:users_detail' user.pk %}"> {{user.user_id}}</a></td>
+            <td>{{user.name}}</td>
+            <td>{{user.kana_name}}</td>
+            <td>{{user.department}}</td>
+            <td>{{user.phone_number}}</td>
+            <td>{{user.mail}}</td>
+            <td>{{user.notes}}</td>
+            <td>{{user.update_date|date:"Y/m/d H:i"}}</td>
+
+              {% if user.retirement_date == None %}
+                <td><span class="green">在籍中</span></td>
+              {% else %}
+                <td><span class="gray">退職済</span></td>
+              {% endif %}
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,635 @@
+$cBlack: rgb(30, 30, 30);
+$cRed: rgb(200, 70, 70);
+$cDarkRed: rgb(100, 0, 0);
+$DarkRed: rgb(155, 100, 100);
+$cGray: gray;
+$cDarkGray: rgb(70, 70, 70);
+$cwhite: rgb(245, 245, 245);
+$cYellow: rgba(255, 225, 0, 0.5);
+$cBlue: rgb(30, 130, 220);
+$cDarkBlue: rgb(35, 85, 140);
+$cSky: rgb(200, 240, 255);
+$cGreen: rgb(0, 140, 0);
+$cSilver: silver;
+
+// #>id, .>class
+
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  color: $cBlack;
+  background-color: $cwhite;
+}
+
+body {
+  margin-top: 80px;
+  min-width: auto;
+  overflow-y: auto;
+  overflow-x: auto;
+  & .container{
+    table-layout: fixed;
+    max-width: 95%;
+  }
+}
+
+footer {
+  padding: 10px;
+}
+
+//ナビゲーションバー
+.container-fluid{
+  height: 80px;
+  display: flex;
+  background-color: $cSky;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
+  z-index: 999;
+
+  & .top-btn{
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 200px;
+    height: 50%;
+    max-height: 50px;
+    text-align: center;
+    outline: none;
+    
+    & span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: 0.5s;
+
+      &:nth-child(1) {
+        background: $cSky;
+        color: $cBlack;
+        transform: rotateX(0deg);
+        /*はじめは回転なし*/
+        transform-origin: 0 50% -25px;
+        /* 回転する起点 */
+      }
+      
+      &:nth-child(2) {
+          background: $cBlack;
+          color: $cwhite;
+          transform: rotateX(-90deg);
+          /*はじめはX軸に-90度回転*/
+          transform-origin: 0 50% -25px;
+          /* 回転する起点 */
+      }
+    }
+    
+    &:hover span:nth-child(1) {
+      transform: rotateX(90deg);
+      /* X軸に90度回転 */
+    }
+      
+    &:hover span:nth-child(2) {
+      transform: rotateX(0deg);
+      /* X軸に0度回転 */
+    }
+  }
+
+  & ul{
+    & li{
+      & .nav-link.active{
+        background-color: $cSky;
+        color: $cBlack;
+        position: relative;
+        text-decoration: none;
+        text-align: center;
+
+        &::after{
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: $cBlack;
+          transform: scaleX(0);
+          transition: transform 0.3s;
+        }
+
+        &:hover::after{
+          transform: scaleX(1);
+        }
+      }
+    }
+  }
+}
+
+//ページタイトル
+.page-title{
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+}
+
+//indexボタン
+.index{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  
+  .index-btn{
+    text-align: center;
+    font-size: 30px;
+    vertical-align: middle;
+    text-decoration: none;
+    width: 30%;
+    height: auto;
+    margin: auto;
+    margin-bottom: 30px;
+    padding: 20px;
+    font-weight: bold;
+    border: 2px solid $cBlue;
+    color: $cBlue;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+
+    &:hover{
+      color: $cwhite;
+      
+      &::before{
+        transform: translateX(0);
+      }
+    }
+
+    &::before{
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: $cBlue;
+      transform: translateX(-100%);
+      transition: all .3s;
+      z-index: -1;
+    }
+  }
+}
+
+//新規作成ボタン
+.create{
+  text-align: right;
+  
+  .create-btn{
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: none;
+    width: 200px;
+    margin: auto;
+    padding: auto;
+    font-weight: bold;
+    border: 2px solid $cBlue;
+    color: $cBlue;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+
+    &:hover{
+      color: $cwhite;
+      
+      &::before{
+        transform: translateX(0);
+      }
+    }
+
+    &::before{
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: $cBlue;
+      transform: translateX(-100%);
+      transition: all .3s;
+      z-index: -1;
+    }
+  }
+}
+
+//管理画面テーブル
+.list-table{
+  text-align: center;
+  table-layout: fixed;
+
+  & td{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3;
+  }
+}
+
+//詳細ボタン
+.detail-btn{
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0 auto;
+  width: auto;
+  padding: 5px;
+  color: $cwhite;
+  transition: 0.3s ease-in-out;
+  font-weight: 600;
+  background: $cBlue;
+  border-radius: 8px;
+  border-bottom: solid 5px $cDarkBlue;
+
+  &:hover {
+    border-bottom: solid 2px $cDarkBlue;
+    transform: translateY(3px);
+    color: $cwhite;
+  }
+}
+
+//期限超過アラート
+.alert-message{
+  text-align: left;
+
+  & .btn-alert{
+    background: $cYellow;
+    border-bottom: solid 5px $cYellow;
+    transition: 0.3s;
+    animation: move_a 4s infinite;
+      
+    @keyframes move_a {
+      0% {transform: translate(0px, 2px);}
+      5% {transform: translate(0px, -2px);}
+      10% {transform: translate(0px, 2px);}
+      15% {transform: translate(0px, -2px);}
+      20% {transform: translate(0px, 2px);}
+      25% {transform: translate(0px, -2px);}
+      30% {transform: translate(0px, 0px);}
+    }
+      
+    &:hover {
+      border-bottom: solid 2px $cYellow;
+      transform: translateY(3px);
+    }
+  }
+  & .alert-table{
+    table-layout: fixed;
+
+    & tbody td {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 3;
+    }
+  }
+}
+
+//サマリー表示
+.summary{
+  padding: 5px;
+  text-align: left;
+}
+
+//詳細画面
+.detail-table{
+  border-spacing: 0;
+  margin: auto;
+  & th{
+    padding: 10px;
+    border-bottom: 1px solid $cGray;
+    text-align: left;
+    vertical-align: top;
+
+    & label{
+      width: 150px;
+    }
+  }
+
+  & td{
+    display: flexbox;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid $cGray;
+    width: 500px;
+    word-break: break-word;
+  }
+}
+
+//新規作成・編集画面
+.create-table, .edit-table{
+  border-spacing: 0;
+  margin: auto;
+  & th{
+    color: $cBlack;
+    padding: 10px;
+    border-bottom: 1px solid $cGray;
+    text-align: left;
+    
+    & label{
+      z-index: -1;
+      width: 150px;
+    }
+
+    &.hissu {
+      padding-right: 4em;
+      position: relative;
+
+      &::after {
+        content: "必須";
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        top: 15px;
+        border: 1px ;
+        padding: 0 5px;
+        font-size: 85%;
+        background: $cRed;
+        color: $cwhite;
+      }
+    }
+
+    &.ninni {
+      padding-right: 4em;
+      position: relative;
+
+      &::after {
+        content: "任意";
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        top: 15px;
+        border: 1px solid $cwhite;
+        padding: 0 5px;
+        font-size: 85%;
+        background: $cSky;
+        color: $cBlack;
+      }
+    }
+  }
+
+  & td{
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid $cGray;
+    width: 500px;
+    word-break: break-word;
+  }
+
+  @media (max-width:500px) {
+    &, & tr, & th, &td{
+      display: block;
+    }
+
+    & th {
+      width: auto;
+      border-bottom: none;
+      padding: 13px 10px 0 5em;
+    }
+
+    .hissu::after, .ninni::after {
+      right: auto;
+      left: 15px;
+    }
+
+    & textarea {
+      width: calc(100% - 10px);
+    }
+  }
+}
+
+//戻る・登録・完了・削除・返却ボタン
+.enter-btns{
+  text-align: center;
+  padding: 20px;
+  
+  & .btn{
+    display: inline-block;
+    position: relative;
+    margin: auto 20px;
+    width: 100px;
+    padding: 10px 20px;
+    color: $cwhite;
+    transition: 0.3s ease-in-out;
+    font-weight: 600;
+    border-radius: 8px;
+    
+    &.back-btn{
+      background: $cGray;
+      border-bottom: solid 5px $cDarkGray;
+      
+      &:hover {
+        border-bottom: solid 2px $cDarkGray;
+        transform: translateY(3px);
+      }
+    }
+
+    &.decision-btn{
+      background: $cBlue;
+      border-bottom: solid 5px $cDarkBlue;
+      
+      &:hover {
+        border-bottom: solid 2px $cDarkGray;
+        transform: translateY(3px);
+      }
+    }
+
+    &.danger-btn{
+      background: $cRed;
+      border-bottom: solid 5px $cDarkGray;
+      
+      &:hover {
+        border-bottom: solid 2px $cDarkGray;
+        transform: translateY(3px);
+      }
+    }
+  }
+  
+}
+
+//新規貸出選択ボタン
+.select-btn{
+  color: $cwhite;
+  background: $cBlue;
+  border: 1px solid $cDarkBlue;
+  
+  &:hover {
+    color: $cBlue;
+    background: $cwhite;
+    border: 1px solid $cDarkBlue;
+    cursor: pointer;
+    }
+}
+
+//各モーダル
+.modal-content{
+  & .modal-body{
+
+    & ul {
+      background: $cwhite;
+      border-radius: 8px;
+      box-shadow: 0px 0px 5px $cSilver;
+      padding: 0.5em 0.5em 0.5em 2em;
+    }
+  
+    & ul li {
+      line-height: 1.5;
+      padding: 0.5em 0;
+    }
+
+    & table{
+      table-layout: fixed;
+
+      & th {
+        width: fit-content;
+        padding: 10px;
+        border-bottom: 1px solid $cGray;
+        text-align: center;
+        vertical-align: top;
+      }
+      
+      & td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid $cGray;
+        width: fit-content;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 3;
+      }
+    }
+  }
+
+  & .modal-footer{
+    text-align: center;
+    padding: 20px;
+
+    & .btn {
+      display: inline-block;
+      position: relative;
+      margin: auto 20px;
+      width: 100px;
+      padding: 10px 20px;
+      color: $cwhite;
+      transition: 0.3s ease-in-out;
+      font-weight: 600;
+      border-radius: 8px;
+
+      &.back-btn {
+        background: $cGray;
+        border-bottom: solid 5px $cDarkGray;
+
+        &:hover {
+          border-bottom: solid 2px $cDarkGray;
+          transform: translateY(3px);
+        }
+      }
+
+      &.decision-btn {
+        background: $cBlue;
+        border-bottom: solid 5px $cDarkBlue;
+    
+        &:hover {
+          border-bottom: solid 2px $cDarkGray;
+          transform: translateY(3px);
+        }
+      }
+
+      &.danger-btn {
+        background: $cRed;
+        border-bottom: solid 5px $cDarkGray;
+
+        &:hover {
+          border-bottom: solid 2px $cDarkGray;
+          transform: translateY(3px);
+        }
+      }
+    }
+  }
+}
+
+//エラーメッセージ
+.error-message{
+  color: $cRed;
+  padding: 5px;
+}
+
+.attention{
+  color: $cRed;
+  text-align: center;
+}
+
+//グリーン
+.green{
+  color: $cGreen;
+}
+
+//グレー
+.gray{
+  color: $cGray;
+}
+
+.messages {
+  animation-name: smooth-fadein-out;
+  animation-duration: 1.5s;
+  animation-timing-function: ease;
+  animation-delay: 0s;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  
+  @keyframes smooth-fadein-out {
+    0% { opacity: 0;}
+    100% { opacity: 1;}
+  }
+
+  & div.alert{
+    width: fit-content;
+    text-align: center;
+    margin: auto;
+    
+  }
+}
+
+//フォームの設定
+form{
+  & input, select, textarea, #retirement_date{
+    width: 15em;
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 3px;
+    border: 2px solid $cGray;
+    box-sizing: border-box;
+    
+    &:focus{
+      box-shadow: 0 0 5px 0 $cDarkBlue;
+      border: 2px solid $cBlue;
+      z-index: 10;
+      outline: 0;
+    }
+  }
+
+  & input[type="date"], #retirement_date{
+    width: 10em;
+  }
+
+  & input[type="datetime-local"]{
+    width: 12em;
+  }
+  
+  & textarea{
+    width: 500px;
+    height: 200px;
+  }
+}
